@@ -21,9 +21,10 @@ class Program
         // main window settings
         var nativeSettings = new NativeWindowSettings()
         {
+            // look I put a lot of thought into it. yk the phrase "the mitochondria is the powerhouse of the cell" its like "chondria is the powerhouse of your games" 
             Title = "Chondria",
             Flags = ContextFlags.ForwardCompatible,
-            WindowState = WindowState.Normal,
+            WindowState = WindowState.Normal, // Dear ImGui, please let me be able to make a resizable window without throwing a temper tantrum when I add you.
             WindowBorder = WindowBorder.Resizable,
         };
 
@@ -31,4 +32,16 @@ class Program
         var window = new MainWindow(GameWindowSettings.Default, nativeSettings);
         window.Run();
     }
+
+    /*
+     
+     
+     3/28/2026 - Made project and played with software rendering.
+
+     3/29/2026 - Added a Input system, mathimatical structs, and a GLRenderer (only renders a cube right now). Also added a camera and camera controller.
+
+     3/30/2026 - Who knows, hasen't happened yet.
+     
+     
+     */
 }

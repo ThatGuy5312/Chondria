@@ -1,4 +1,6 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using Chondria.Math;
+using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 
 namespace Chondria.Rendering;
 
@@ -27,8 +29,23 @@ public class Shader
         GL.DeleteShader(fragmentShader);
     }
 
-    public void Use()
-    {
-        GL.UseProgram(Handle);
-    }
+    public void Use() => GL.UseProgram(Handle);
+
+    public void SetMatrix4(string name, Matrix4 value)
+    => GL.UniformMatrix4(GL.GetUniformLocation(Handle, name), false, ref value);
+
+    public void SetVector3(string name, Math.Vector3 value)
+        => GL.Uniform3(GL.GetUniformLocation(Handle, name), value);
+
+    public void SetVector2(string name, Math.Vector2 value)
+        => GL.Uniform2(GL.GetUniformLocation(Handle, name), value);
+
+    public void SetVector4(string name, Math.Vector4 value)
+        => GL.Uniform4(GL.GetUniformLocation(Handle, name), value);
+
+    public void SetInt(string name, int value)
+        => GL.Uniform1(GL.GetUniformLocation(Handle, name), value);
+
+    public void SetFloat(string name, float value)
+        => GL.Uniform1(GL.GetUniformLocation(Handle, name), value);
 }

@@ -1,4 +1,6 @@
-﻿namespace Chondria.Rendering.Drawers;
+﻿using Chondria.Rendering.Software;
+
+namespace Chondria.Rendering.Drawers;
 
 // kinda like a render pipeline, temperary
 public interface IDrawer
