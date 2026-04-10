@@ -46,12 +46,13 @@ internal class MainWindow : GameWindow
 
         Input.UpdateInput(MouseState, KeyboardState);
 
-        cameraController.Update();
+        cameraController.Update((float)args.Time);
     }
 
     protected override void OnResize(ResizeEventArgs e)
     {
         base.OnResize(e);
+        glRenderer.Resize(Size.X, Size.Y);
         //renderer.Resize(Size.X, Size.Y);
     }
 

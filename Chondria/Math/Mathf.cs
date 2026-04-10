@@ -17,39 +17,51 @@ public struct Mathf
         return v;
     }
 
-    public static Vector3 RotateX(Vector3 v, float angle)
-    {
-        float cos = (float)System.Math.Cos(angle);
-        float sin = (float)System.Math.Sin(angle);
+    public static float Lerp(float a, float b, float t) => a + (b - a) * t;
 
-        return new Vector3(
-            v.X,
-            v.Y * cos - v.Z * sin,
-            v.X * sin + v.Z * cos
-        );
-    }
+    public static float DegreesToRadians(float degrees) => degrees * (MathF.PI / 180f);
 
-    public static Vector3 RotateY(Vector3 v, float angle)
-    {
-        float cos = (float)System.Math.Cos(angle);
-        float sin = (float)System.Math.Sin(angle);
+    public static float RadiansToDegrees(float radians) => radians * (180f / MathF.PI);
 
-        return new Vector3(
-            v.X * cos - v.Z * sin,
-            v.Y,
-            v.X * sin + v.Z * cos
-        );
-    }
+    public static float Sin(float radians) => MathF.Sin(radians);
 
-    public static Vector3 RotateZ(Vector3 v, float angle)
-    {
-        float cos = (float)System.Math.Cos(angle);
-        float sin = (float)System.Math.Sin(angle);
+    public static float Cos(float radians) => MathF.Cos(radians);
 
-        return new Vector3(
-            v.X * cos - v.Z * sin,
-            v.Y * cos - v.Z * sin,
-            v.Y
-        );
-    }
+    public static float Tan(float radians) => MathF.Tan(radians);
+
+    public static float Asin(float value) => MathF.Asin(value);
+
+    public static float Acos(float value) => MathF.Acos(value);
+
+    public static float Atan(float x) => MathF.Atan(x);
+    public static float Atan2(float y, float x) => MathF.Atan2(y, x);
+
+    public static float Sqrt(float value) => MathF.Sqrt(value);
+
+    public static float Abs(float value) => MathF.Abs(value);
+
+    public static float Pow(float x, float y) => MathF.Pow(x, y);
+
+    public static float Exp(float power) => MathF.Exp(power);
+
+    public static float Log(float value) => MathF.Log(value);
+
+    public static float Log10(float value) => MathF.Log10(value);
+
+    public static float Floor(float value) => MathF.Floor(value);
+
+    public static float Ceiling(float value) => MathF.Ceiling(value);
+
+    public static float Round(float value) => MathF.Round(value);
+
+    public static float Sign(float value) => MathF.Sign(value);
+
+    public static float Max(float a, float b) => MathF.Max(a, b);
+
+    public static float Min(float a, float b) => MathF.Min(a, b);
+
+    public static int Max(int a, int b) => (int)MathF.Max(a, b);
+
+    public static int Min(int a, int b) => (int)MathF.Min(a, b);
+
 }

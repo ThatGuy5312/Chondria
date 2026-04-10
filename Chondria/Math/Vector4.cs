@@ -34,10 +34,12 @@ public struct Vector4
     #region Implicit conversions and math operators
 
     // Thank you copliot for recommending this. I didn't know this was a thing, and I absolutely love it. I'm adding this to all my vector structs now.
-    public static implicit operator OpenTK.Mathematics.Vector4(Vector4 v) => new(v.X, v.Y, v.Z, v.Z);
-    public static implicit operator Vector4(OpenTK.Mathematics.Vector4 v) => new(v.X, v.Y, v.Z, v.Z);
-    public static implicit operator Vector4(System.Numerics.Vector4 v) => new(v.X, v.Y, v.Z, v.Z);
-    public static implicit operator System.Numerics.Vector4(Vector4 v) => new(v.X, v.Y, v.Z, v.Z);
+    public static implicit operator OpenTK.Mathematics.Vector4(Vector4 v) => new(v.X, v.Y, v.Z, v.W);
+    public static implicit operator Vector4(OpenTK.Mathematics.Vector4 v) => new(v.X, v.Y, v.Z, v.W);
+    public static implicit operator Vector4(System.Numerics.Vector4 v) => new(v.X, v.Y, v.Z, v.W);
+    public static implicit operator System.Numerics.Vector4(Vector4 v) => new(v.X, v.Y, v.Z, v.W);
+
+    public static implicit operator Vector4(Vector4i v) => new(v.X, v.Y, v.Z, v.W);
 
     // math operators
     public static Vector4 operator +(Vector4 a, Vector4 b) => new(a.X + b.X, a.Y + b.Y, a.Z + b.Z, a.W + b.W);

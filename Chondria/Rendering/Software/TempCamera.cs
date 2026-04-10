@@ -17,8 +17,8 @@ namespace Chondria.Rendering.Software
             Vector3 v = point - Position;
 
             // rotate opposite of camera rotation
-            v = Mathf.RotateY(v, -Yaw);
-            v = Mathf.RotateX(v, -Pitch);
+            //v = Mathf.RotateY(v, -Yaw);
+            //v = Mathf.RotateX(v, -Pitch);
 
             return v;
         }
@@ -43,10 +43,10 @@ namespace Chondria.Rendering.Software
         {
             float speed = 0.1f;
 
-            if (Input.IsKeyDown(Keys.W)) Position += Forward() * speed;
-            if (Input.IsKeyDown(Keys.S)) Position -= Forward() * speed;
-            if (Input.IsKeyDown(Keys.A)) Position -= Right() * speed;
-            if (Input.IsKeyDown(Keys.D)) Position += Right() * speed;
+            if (Input.IsKeyDown(Key.W)) Position += Forward() * speed;
+            if (Input.IsKeyDown(Key.S)) Position -= Forward() * speed;
+            if (Input.IsKeyDown(Key.A)) Position -= Right() * speed;
+            if (Input.IsKeyDown(Key.D)) Position += Right() * speed;
         }
     }
 }

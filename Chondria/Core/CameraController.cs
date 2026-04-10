@@ -1,27 +1,66 @@
 ﻿using Chondria.InputSystem;
 using Chondria.Math;
 using Chondria.Scene;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Chondria.Core;
 
 internal class CameraController(Camera camera)
 {
-    public void Update()
-    {
-        // Example camera movement (WASD)
-        if (Input.IsKeyDown(Keys.W))
-            camera.Position -= Vector3.UnitZ * .001f;
-        if (Input.IsKeyDown(Keys.S))
-            camera.Position += Vector3.UnitZ * .001f;
-        if (Input.IsKeyDown(Keys.A))
-            camera.Position -= Vector3.UnitX * .001f;
-        if (Input.IsKeyDown(Keys.D))
-            camera.Position += Vector3.UnitX * .001f;
+    Camera camera = camera;
 
-        if (Input.IsKeyDown(Keys.E))
-            camera.Position += Vector3.UnitY * .001f;
-        if (Input.IsKeyDown(Keys.Q))
-            camera.Position -= Vector3.UnitY * .001f;
+    float acceleration = 1f;
+    float normalMoveSpeed = 1f;
+
+    float moveSpeed = 1f;
+    float mouseSensitivity = .2f;
+
+    Vector3 euler;
+    Vector2 lastMousePos;
+
+    bool firstMouse = true;
+
+    public void Update(float deltaTime)
+    {
+        var mousePos = Input.MousePosition;
+
+        if (firstMouse)
+        {
+            lastMousePos = mousePos;
+            firstMouse = false;
+        }
+
+        if (Input.IsMouseDown(1))
+        {
+            var delta = mousePos - lastMousePos;
+            lastMousePos = mousePos;
+
+            euler.X -= delta.X * mouseSensitivity;
+            euler.Y -= delta.Y * mouseSensitivity;
+
+            camera.Rotation = Quaternion.FromEulerAngles(euler);
+        }
+        else
+        {
+            firstMouse = true;
+        }
+
+        // camera movement (WASDQE)
+        if (Input.IsKeyDown(Key.W))
+            camera.Position += camera.Forward * moveSpeed * deltaTime;
+        if (Input.IsKeyDown(Key.S))
+            camera.Position -= camera.Forward * moveSpeed * deltaTime;
+        if (Input.IsKeyDown(Key.A))
+            camera.Position -= camera.Right * moveSpeed * deltaTime;
+        if (Input.IsKeyDown(Key.D))
+            camera.Position += camera.Right * moveSpeed * deltaTime;
+        if (Input.IsKeyDown(Key.E))
+            camera.Position += camera.Up * moveSpeed * deltaTime;
+        if (Input.IsKeyDown(Key.Q))
+            camera.Position -= camera.Up * moveSpeed * deltaTime;
+
+        if (Input.IsKeyDown(Key.LeftShift))
+            moveSpeed += acceleration * deltaTime;
+        else
+            moveSpeed = normalMoveSpeed;
     }
 }

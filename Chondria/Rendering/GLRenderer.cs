@@ -97,17 +97,18 @@ public class GLRenderer
         Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(0)) *
         Matrix4.CreateTranslation(0, 0, 0);
 
-        var view = camera.GetViewMatrix();
-
-        var projection = camera.GetProjectionMatrix();
-
         shader.Use();
         shader.SetMatrix4("model", model);
-        shader.SetMatrix4("view", view);
-        shader.SetMatrix4("projection", projection);
+        shader.SetMatrix4("view", camera.View);
+        shader.SetMatrix4("projection", camera.Projection);
 
         GL.BindVertexArray(vao);
         GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
+    }
+
+    public void Resize(int width, int height)
+    {
+        GL.Viewport(0, 0, width, height);
     }
 
     string vertexSource = @"

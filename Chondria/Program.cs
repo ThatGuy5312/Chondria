@@ -40,7 +40,15 @@ class Program
 
      3/29/2026 - Added a Input system, mathimatical structs, and a GLRenderer (only renders a cube right now). Also added a camera and camera controller.
 
+     i forgot what day it is. its 3/30 right now but its also 2 in the morning. and i worked on the last update yesterday. but i didn't work on anything today.
+     actually i did do something and that was add a interger version of the vector struct. but i dont know it i did that today or yesterday or tomorrow. 
+     whatever im to tired for this and i dont feel like updating the github just for some vector additions.
+
      3/30/2026 - Who knows, hasen't happened yet.
+
+     was on spring break and went to arizona for a week
+
+     4/9/2026 - Added a Quaternion struct, added a Key enum for the input system, and made the camera better along with its freecam and also made the viewport resizable.
      
      
      */
