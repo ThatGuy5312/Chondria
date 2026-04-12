@@ -24,7 +24,7 @@ class Program
             // look I put a lot of thought into it. yk the phrase "the mitochondria is the powerhouse of the cell" its like "chondria is the powerhouse of your games" 
             Title = "Chondria",
             Flags = ContextFlags.ForwardCompatible,
-            WindowState = WindowState.Normal, // Dear ImGui, please let me be able to make a resizable window without throwing a temper tantrum when I add you.
+            WindowState = WindowState.Maximized, // Dear ImGui, please let me be able to make a resizable window without throwing a temper tantrum when I add you.
             WindowBorder = WindowBorder.Resizable,
         };
 
@@ -50,6 +50,9 @@ class Program
 
      4/9/2026 - Added a Quaternion struct, added a Key enum for the input system, and made the camera better along with its freecam and also made the viewport resizable.
      
+     4/10/2026 - Added ImGui (still finicky) and played with shaders. Probably not gonna push this to github today.
+
+     4/11/2026 - Did some black magic with ImGui to fix the mouse offset and to make it work well while being windowed and made the shader be adjustable during runtime. Also added a Time class.
      
      */
 }
