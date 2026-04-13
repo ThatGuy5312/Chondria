@@ -1,32 +1,39 @@
 ﻿using Chondria.InputSystem;
 using Chondria.Math;
 using Chondria.Rendering;
-using Chondria.Scene;
+using Chondria.Management;
+using Chondria.Windowing;
 using ImGuiNET;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Chondria.Core;
 
 // main window for everything
 internal class MainWindow : GameWindow
 {
-    public MainWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) { }
+    public MainWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) => 
+        Instance = this;
+
+    public static MainWindow Instance { get; private set; }
 
     // old things
     //private Renderer renderer;
     // temperary but kinda like a render pipeline
     //private IDrawer drawer;
 
-    private ImGuiController imGuiController;
+    public ImGuiController imGuiController;
 
-    private GLRenderer glRenderer;
-    private Camera SceneCamera;
+    public GLRenderer glRenderer;
+    public Camera SceneCamera;
 
-    private CameraController cameraController;
+    public CameraController cameraController;
+
+    Dictionary<object, MethodInfo> editorWindows = [];
 
     protected override void OnLoad()
     {
@@ -36,6 +43,8 @@ internal class MainWindow : GameWindow
         //renderer.Init(Size.X, Size.Y);
 
         //drawer = new TestPatternDrawer();
+
+        FindEditorWindows();
 
         SetupFramebuffer(Size.X, Size.Y);
 
@@ -47,6 +56,10 @@ internal class MainWindow : GameWindow
 
         glRenderer = new GLRenderer();
         glRenderer.Init();
+
+        MainWindowInfo.GLRenderer = glRenderer;
+        MainWindowInfo.SceneCamera = SceneCamera;
+        MainWindowInfo.CameraController = cameraController;
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)
@@ -62,6 +75,7 @@ internal class MainWindow : GameWindow
     {
         base.OnResize(e);
         SetupFramebuffer(e.Width, e.Height);
+        MainWindowInfo.SceneTexture = sceneTexture;
         glRenderer.Resize(e.Width, e.Height);
         //renderer.Resize(Size.X, Size.Y);
     }
@@ -82,10 +96,19 @@ internal class MainWindow : GameWindow
 
         RenderDockspace();
 
-        //glRenderer.Render(in SceneCamera);
-        RenderScene();
+        RenderMenuBar();
 
-        RenderInspector();
+        //glRenderer.Render(in SceneCamera);
+        //RenderScene();
+
+        editorWindows.ToList().ForEach(kv =>
+        {
+            ImGui.Begin(kv.Key.GetType().Name);
+
+            kv.Value.Invoke(kv.Key, null);
+
+            ImGui.End();
+        });
 
         imGuiController.Render();
 
@@ -95,18 +118,8 @@ internal class MainWindow : GameWindow
         SwapBuffers();
     }
 
-    void RenderScene()
+    public void GLRender()
     {
-        ImGui.Begin("Scene");
-
-        var sceneSize = ImGui.GetContentRegionAvail();
-        this.sceneSize = sceneSize;
-        var sceneFocused = ImGui.IsWindowHovered(ImGuiHoveredFlags.RootAndChildWindows);
-        if (sceneFocused)
-            cameraController.Update(Time.DeltaTime);
-
-        SceneCamera.AspectRatio = sceneSize.X / sceneSize.Y;
-
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, sceneFBO);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         GL.Enable(EnableCap.DepthTest);
@@ -117,27 +130,6 @@ internal class MainWindow : GameWindow
 
         GL.Enable(EnableCap.DepthTest);
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-
-        ImGui.Image(sceneTexture, sceneSize, new(0, 1), new(1, 0));
-        ImGui.End();
-    }
-
-    void RenderInspector()
-    {
-        ImGui.Begin("Inspector");
-        
-        var numLightPos = LightingSettings.LightPos.Numerics();
-        if (ImGui.DragFloat3("Camera Position", ref numLightPos))
-            LightingSettings.LightPos = numLightPos;
-
-        var numObjectColor = LightingSettings.ObjectColor.Numerics();
-        if (ImGui.ColorEdit3("Object Color", ref numObjectColor))
-            LightingSettings.ObjectColor = numObjectColor;
-
-        ImGui.DragFloat("Specular Strength", ref LightingSettings.SpecularStrength, 0.01f);
-        ImGui.DragFloat("Shininess", ref LightingSettings.Shininess, 1f);
-
-        ImGui.End();
     }
 
     void RenderDockspace()
@@ -161,9 +153,23 @@ internal class MainWindow : GameWindow
         ImGui.PopStyleVar(2);
     }
 
-    Vector2 sceneSize = new(0, 0);
+    void RenderMenuBar()
+    {
+        if (ImGui.BeginMainMenuBar())
+        {
+            if (ImGui.BeginMenu("File"))
+            {
+                if (ImGui.MenuItem("Exit"))
+                    Close();
+                ImGui.EndMenu();
+            }
+            ImGui.EndMainMenuBar();
+        }
+    }
 
-    int sceneFBO, sceneTexture, sceneDepth;
+    public Vector2 sceneSize = new(0, 0);
+
+    public int sceneFBO, sceneTexture, sceneDepth;
 
     void SetupFramebuffer(int width, int height)
     {
@@ -201,5 +207,23 @@ internal class MainWindow : GameWindow
             Console.WriteLine("Framebuffer not complete!");
 
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+    }
+
+    void FindEditorWindows()
+    {
+        editorWindows.Clear();
+
+        foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
+        {
+            if (type.GetCustomAttribute<EditorWindowAttribute>() != null)
+            {
+                var instance = Activator.CreateInstance(type);
+
+                var method = type.GetMethods()
+                    .FirstOrDefault(m => m.GetCustomAttribute<EditorWindowDrawAttribute>() != null);
+
+               editorWindows.Add(instance, method);
+            }
+        }
     }
 }

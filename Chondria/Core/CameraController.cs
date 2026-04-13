@@ -1,12 +1,16 @@
 ﻿using Chondria.InputSystem;
 using Chondria.Math;
-using Chondria.Scene;
+using Chondria.Management;
 
 namespace Chondria.Core;
 
 internal class CameraController(Camera camera)
 {
     Camera camera = camera;
+
+    public enum CameraMode { Free, Orbit }
+
+    public CameraMode Mode = CameraMode.Free;
 
     float acceleration = 1f;
     float normalMoveSpeed = 1f;
@@ -19,9 +23,23 @@ internal class CameraController(Camera camera)
 
     bool firstMouse = true;
 
+    Vector3 Target = Vector3.Zero;
+    float Distance = 5f;
+
     public void Update(float deltaTime)
     {
+        if (Mode == CameraMode.Free)
+            HandleFreeCamera(deltaTime);
+        else
+            HandleOrbitalCamera(deltaTime);
+    }
+
+    void HandleFreeCamera(float deltaTime)
+    {
         var mousePos = Input.MousePosition;
+
+        var delta = mousePos - lastMousePos;
+        lastMousePos = mousePos;
 
         if (firstMouse)
         {
@@ -31,9 +49,6 @@ internal class CameraController(Camera camera)
 
         if (Input.IsMouseDown(1))
         {
-            var delta = mousePos - lastMousePos;
-            lastMousePos = mousePos;
-
             euler.X -= delta.X * mouseSensitivity;
             euler.Y -= delta.Y * mouseSensitivity;
 
@@ -62,5 +77,51 @@ internal class CameraController(Camera camera)
             moveSpeed += acceleration * deltaTime;
         else
             moveSpeed = normalMoveSpeed;
+    }
+
+    void HandleOrbitalCamera(float deltaTime)
+    {
+        var mousePos = Input.MousePosition;
+
+        if (firstMouse)
+        {
+            lastMousePos = mousePos;
+            firstMouse = false;
+        }
+
+        var delta = mousePos - lastMousePos;
+        lastMousePos = mousePos;
+
+        // orbitial rotation
+        if (Input.IsMouseDown(2) && !Input.IsKeyDown(Key.LeftShift))
+        {
+            euler.X -= delta.X * mouseSensitivity;
+            euler.Y -= delta.Y * mouseSensitivity;
+        }
+
+        //if (justRotate)
+            //return;
+
+        // panning
+        if (Input.IsMouseDown(2) && Input.IsKeyDown(Key.LeftShift))
+        {
+            float panSpeed = Distance * 0.002f;
+
+            Vector3 right = Vector3.Normalize(Vector3.Cross(Target - camera.Position, Vector3.UnitY));
+            Vector3 up = Vector3.Normalize(Vector3.Cross(right, Target - camera.Position));
+
+            Target -= right * delta.X * panSpeed;
+            Target += up * delta.Y * panSpeed;
+        }
+
+        // zooming
+        if (Input.ScrollDelta.Y != 0)
+        {
+            Distance *= (1f - Input.ScrollDelta.Y * 0.1f);
+            Distance = Mathf.Clamp(Distance, 0.1f, 500f);
+        }
+
+        camera.Rotation = Quaternion.FromEulerAngles(euler);
+        camera.Position = Target - camera.Forward * Distance;
     }
 }

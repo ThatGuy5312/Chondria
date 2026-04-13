@@ -1,4 +1,4 @@
-﻿using Chondria.Scene;
+﻿using Chondria.Management;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using System.Reflection.Metadata;
@@ -6,7 +6,7 @@ using System.Reflection.Metadata;
 namespace Chondria.Rendering;
 
 // the main renderer and powerhouse of the rendering system, handles all the rendering and shader management
-// renderer version 2026.0.1.0
+// renderer version 2026.0.2.1
 public class GLRenderer
 {
     int vao;
@@ -104,11 +104,26 @@ public class GLRenderer
         shader.SetMatrix4("view", camera.View);
         shader.SetMatrix4("projection", camera.Projection);
 
-        GL.Uniform3(GL.GetUniformLocation(shader.Handle, "lightPos"), LightingSettings.LightPos);
-        GL.Uniform3(GL.GetUniformLocation(shader.Handle, "objectColor"), LightingSettings.ObjectColor);
-        GL.Uniform1(GL.GetUniformLocation(shader.Handle, "specularStrength"), LightingSettings.SpecularStrength);
-        GL.Uniform1(GL.GetUniformLocation(shader.Handle, "shininess"), LightingSettings.Shininess);
-        GL.Uniform3(GL.GetUniformLocation(shader.Handle, "viewPos"), camera.Position);
+        shader.SetInt("lightCount", LightingSettings.Lights.Count);
+
+        for (int i = 0; i < LightingSettings.Lights.Count; i++)
+        {
+            var light = LightingSettings.Lights[i];
+
+            string prefix = $"lights[{i}]";
+
+            shader.SetVector3(prefix + ".position", light.Position);
+            shader.SetVector3(prefix + ".color", light.Color);
+
+            shader.SetFloat(prefix + ".constant", light.Constant);
+            shader.SetFloat(prefix + ".linear", light.Linear);
+            shader.SetFloat(prefix + ".quadratic", light.Quadratic);
+        }
+
+        shader.SetVector3("objectColor", LightingSettings.Material.Color);
+        shader.SetFloat("specularStrength", LightingSettings.Material.SpecularStrength);
+        shader.SetFloat("shininess", LightingSettings.Material.Shininess);
+        shader.SetVector3("viewPos", camera.Position);
 
         GL.BindVertexArray(vao);
         GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
@@ -142,13 +157,26 @@ void main()
 
     string fragmentSource = @"
 #version 330 core
+#define MAX_LIGHTS 8
 
 in vec3 Normal;
 in vec3 FragPos;
 
 out vec4 FragColor;
 
-uniform vec3 lightPos;
+struct Light
+{
+    vec3 position;
+    vec3 color;
+
+    float constant;
+    float linear;
+    float quadratic;
+};
+
+uniform Light lights[MAX_LIGHTS];
+uniform int lightCount;
+
 uniform vec3 viewPos;
 uniform vec3 objectColor;
 
@@ -158,37 +186,37 @@ uniform float shininess;
 void main()
 {
     vec3 norm = normalize(Normal);
-
-    // Light direction (point light!)
-    vec3 lightDir = normalize(lightPos - FragPos);
-
-    // Diffuse
-    float diff = max(dot(norm, lightDir), 0.0);
-
-    // View direction
     vec3 viewDir = normalize(viewPos - FragPos);
 
-    // Reflection
-    vec3 reflectDir = reflect(-lightDir, norm);
+    vec3 result = vec3(0.0);
 
-    // Specular
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+    for (int i = 0; i < lightCount; i++)
+    {
+        vec3 lightDir = normalize(lights[i].position - FragPos);
 
-    float distance = length(lightPos - FragPos);
+        // Diffuse
+        float diff = max(dot(norm, lightDir), 0.0);
 
-    float constant = 1.0;
-    float linear = 0.09;
-    float quadratic = 0.032;
+        // Specular
+        vec3 reflectDir = reflect(-lightDir, norm);
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
 
-    float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
+        // Attenuation
+        float distance = length(lights[i].position - FragPos);
+        float attenuation = 1.0 / (
+            lights[i].constant +
+            lights[i].linear * distance +
+            lights[i].quadratic * distance * distance
+        );
 
-    vec3 diffuse = diff * objectColor;
-    vec3 specular = specularStrength * spec * vec3(1.0);
+        vec3 diffuse = diff * lights[i].color * objectColor;
+        vec3 specular = specularStrength * spec * lights[i].color;
 
-    diffuse *= attenuation;
-    specular *= attenuation;
+        diffuse *= attenuation;
+        specular *= attenuation;
 
-    vec3 result = diffuse + specular;
+        result += diffuse + specular;
+    }
 
     FragColor = vec4(result, 1.0);
 }";
@@ -196,10 +224,40 @@ void main()
 
 public static class LightingSettings
 {
-    public static Math.Vector3 LightPos = new Vector3(2f, 2f, 2f);
+    public static List<Light> Lights = new()
+    {
+        new Light
+        {
+            Position = new(2f, 2f, 2f),
+            Color = new(1f, 1f, 1f),
+            Constant = 1f,
+            Linear = 0.09f,
+            Quadratic = 0.032f
+        },
+        new Light
+        {
+            Position = new(-2f, 1f, 0f),
+            Color = new(0.2f, 0.5f, 1f),
+            Constant = 1f,
+            Linear = 0.09f,
+            Quadratic = 0.032f
+        }
+    };
 
-    public static Math.Vector3 ObjectColor = new Vector3(1f, 0.5f, 0.3f);
+    public static Material Material = new Material
+    {
+        Color = new(1f, 0.5f, 0.3f),
+        SpecularStrength = 0.5f,
+        Shininess = 32f
+    };
+}
 
-    public static float SpecularStrength = 0.5f;
-    public static float Shininess = 32f;
+public struct Light
+{
+    public Vector3 Position;
+    public Vector3 Color;
+
+    public float Constant;
+    public float Linear;
+    public float Quadratic;
 }

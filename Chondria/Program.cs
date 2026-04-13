@@ -53,6 +53,8 @@ class Program
      4/10/2026 - Added ImGui (still finicky) and played with shaders. Probably not gonna push this to github today.
 
      4/11/2026 - Did some black magic with ImGui to fix the mouse offset and to make it work well while being windowed and made the shader be adjustable during runtime. Also added a Time class.
+
+     4/12/2026 - Added a orbital camera mode, added mutiple light support to the shader, and made a window system. Also added a Material class and change the Scene folder name to Management. Oh yeah and I also added a Color struct.
      
      */
 }

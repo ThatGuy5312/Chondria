@@ -1,4 +1,6 @@
-﻿namespace Chondria.Math;
+﻿using Chondria.Rendering;
+
+namespace Chondria.Math;
 
 
 // simple math extentions. just for conversions right now.
@@ -13,6 +15,13 @@ public static class MathExtentions
 
     public static System.Numerics.Vector3 Numerics(this Vector3 v) => new(v.X, v.Y, v.Z);
     public static OpenTK.Mathematics.Vector3 TK(this Vector3 v) => new(v.X, v.Y, v.Z);
+    public static OpenTK.Mathematics.Vector3 TK(this System.Numerics.Vector3 v) => new(v.X, v.Y, v.Z);
+    public static System.Numerics.Vector3 Numerics(this OpenTK.Mathematics.Vector3 v) => new(v.X, v.Y, v.Z);
     public static Vector3 ChonVec(this System.Numerics.Vector3 v) => new(v.X, v.Y, v.Z);
     public static Vector3 ChonVec(this OpenTK.Mathematics.Vector3 v) => new(v.X, v.Y, v.Z);
+
+    public static System.Numerics.Vector3 Numerics(this Color v) => new(v.Rf, v.Gf, v.Bf);
+    public static OpenTK.Mathematics.Vector3 TK(this Color v) => new(v.Rf, v.Gf, v.Bf);
+    public static Color Numerics(this System.Numerics.Vector3 v) => new(v.X, v.Y, v.Z);
+    public static Color TK(this OpenTK.Mathematics.Vector3 v) => new(v.X, v.Y, v.Z);
 }
