@@ -10,6 +10,8 @@ internal class MainWindowInfo
 
     public static Camera SceneCamera;
 
+    public static Scene CurrentScene;
+
     public static CameraController CameraController;
 
     public static int SceneTexture;

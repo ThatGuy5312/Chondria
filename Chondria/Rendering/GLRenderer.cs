@@ -6,127 +6,56 @@ using System.Reflection.Metadata;
 namespace Chondria.Rendering;
 
 // the main renderer and powerhouse of the rendering system, handles all the rendering and shader management
-// renderer version 2026.0.2.1
+// renderer version 2026.0.3.1
 public class GLRenderer
 {
-    int vao;
-    int vbo;
     Shader shader;
 
     public void Init()
     {
         GL.Enable(EnableCap.DepthTest);
 
-        float[] vertices = {
-            // position        // normal
-            -0.5f, -0.5f, 0.5f,  0, 0, 1,
-             0.5f, -0.5f, 0.5f,  0, 0, 1,
-             0.5f,  0.5f, 0.5f,  0, 0, 1,
-
-            0.5f,  0.5f, 0.5f,  0, 0, 1,
-            -0.5f,  0.5f, 0.5f,  0, 0, 1,
-            -0.5f, -0.5f, 0.5f,  0, 0, 1,
-
-            -0.5f, -0.5f, -0.5f,  0, 0, -1,
-            0.5f, -0.5f, -0.5f,  0, 0, -1,
-            0.5f, 0.5f, -0.5f,  0, 0, -1,
-
-            0.5f, 0.5f, -0.5f,  0, 0, -1,
-            -0.5f, 0.5f, -0.5f,  0, 0, -1,
-            -0.5f, -0.5f, -0.5f,  0, 0, -1,
-
-            -0.5f, 0.5f, 0.5f,  -1, 0, 0,
-            -0.5f, 0.5f, -0.5f,  -1, 0, 0,
-            -0.5f, -0.5f, -0.5f,  -1, 0, 0,
-
-            -0.5f, -0.5f, -0.5f,  -1, 0, 0,
-            -0.5f, -0.5f, 0.5f,  -1, 0, 0,
-            -0.5f, 0.5f, 0.5f,  -1, 0, 0,
-
-            0.5f, 0.5f, 0.5f,  1, 0, 0,
-            0.5f, 0.5f, -0.5f,  1, 0, 0,
-            0.5f, -0.5f, -0.5f,  1, 0, 0,
-
-            0.5f, -0.5f, -0.5f,  1, 0, 0,
-            0.5f, -0.5f, 0.5f,  1, 0, 0,
-            0.5f, 0.5f, 0.5f,  1, 0, 0,
-
-            -0.5f, 0.5f, -0.5f,  0, 1, 0,
-            0.5f, 0.5f, -0.5f,  0, 1, 0,
-            0.5f, 0.5f, 0.5f,  0, 1, 0,
-
-            0.5f, 0.5f, 0.5f,  0, 1, 0,
-            -0.5f, 0.5f, 0.5f,  0, 1, 0,
-            -0.5f, 0.5f, -0.5f,  0, 1, 0,
-
-            -0.5f, -0.5f, -0.5f,  0, -1, 0,
-            0.5f, -0.5f, -0.5f,  0, -1, 0,
-            0.5f, -0.5f, 0.5f,  0, -1, 0,
-
-            0.5f, -0.5f, 0.5f,  0, -1, 0,
-            -0.5f, -0.5f, 0.5f,  0, -1, 0,
-            -0.5f, -0.5f, -0.5f,  0, -1, 0,
-        };
-
-        vao = GL.GenVertexArray();
-        vbo = GL.GenBuffer();
-
-        GL.BindVertexArray(vao);
-
-        GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
-
-        int stride = 6 * sizeof(float);
-
-        // position
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
-        GL.EnableVertexAttribArray(0);
-
-        // normal
-        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, stride, 3 * sizeof(float));
-        GL.EnableVertexAttribArray(1);
-
         shader = new Shader(vertexSource, fragmentSource);
     }
 
-    public void Render(in Camera camera)
+    public void Render(in Scene scene, in Camera camera)
     {
         //GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-        var model = Matrix4.CreateScale(1, 1f, 1) *
-        Matrix4.CreateRotationX(MathHelper.DegreesToRadians(0)) *
-        Matrix4.CreateRotationY((float)DateTime.Now.TimeOfDay.TotalSeconds) *
-        Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(0)) *
-        Matrix4.CreateTranslation(0, 0, 0);
-
-        shader.Use();
-        shader.SetMatrix4("model", model);
-        shader.SetMatrix4("view", camera.View);
-        shader.SetMatrix4("projection", camera.Projection);
-
-        shader.SetInt("lightCount", LightingSettings.Lights.Count);
-
-        for (int i = 0; i < LightingSettings.Lights.Count; i++)
+        for (int i = 0; i < scene.Objects.Count; i++)
         {
-            var light = LightingSettings.Lights[i];
+            var obj = scene.Objects[i];
 
-            string prefix = $"lights[{i}]";
+            shader.Use();
 
-            shader.SetVector3(prefix + ".position", light.Position);
-            shader.SetVector3(prefix + ".color", light.Color);
+            obj.Render(shader);
 
-            shader.SetFloat(prefix + ".constant", light.Constant);
-            shader.SetFloat(prefix + ".linear", light.Linear);
-            shader.SetFloat(prefix + ".quadratic", light.Quadratic);
-        }
+            shader.SetMatrix4("view", camera.View);
+            shader.SetMatrix4("projection", camera.Projection);
 
-        shader.SetVector3("objectColor", LightingSettings.Material.Color);
-        shader.SetFloat("specularStrength", LightingSettings.Material.SpecularStrength);
-        shader.SetFloat("shininess", LightingSettings.Material.Shininess);
-        shader.SetVector3("viewPos", camera.Position);
+            shader.SetInt("lightCount", LightingSettings.Lights.Count);
 
-        GL.BindVertexArray(vao);
-        GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
+            for (int j = 0; j < LightingSettings.Lights.Count; j++)
+            {
+                var light = LightingSettings.Lights[j];
+
+                string prefix = $"lights[{j}]";
+
+                shader.SetVector3(prefix + ".position", light.Position);
+                shader.SetVector3(prefix + ".color", light.Color);
+
+                shader.SetFloat(prefix + ".constant", light.Constant);
+                shader.SetFloat(prefix + ".linear", light.Linear);
+                shader.SetFloat(prefix + ".quadratic", light.Quadratic);
+            }
+
+            //shader.SetVector3("objectColor", LightingSettings.Material.Color);
+            //shader.SetFloat("specularStrength", LightingSettings.Material.SpecularStrength);
+            //shader.SetFloat("shininess", LightingSettings.Material.Shininess);
+            shader.SetVector3("viewPos", camera.Position);
+
+            obj.Mesh.Draw();
+        }     
     }
 
     public void Resize(int width, int height)

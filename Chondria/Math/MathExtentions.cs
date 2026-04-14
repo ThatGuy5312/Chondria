@@ -24,4 +24,7 @@ public static class MathExtentions
     public static OpenTK.Mathematics.Vector3 TK(this Color v) => new(v.Rf, v.Gf, v.Bf);
     public static Color Numerics(this System.Numerics.Vector3 v) => new(v.X, v.Y, v.Z);
     public static Color TK(this OpenTK.Mathematics.Vector3 v) => new(v.X, v.Y, v.Z);
+
+    public static OpenTK.Mathematics.Matrix4 TK(this Matrix4 m) => new(m.Row0, m.Row1, m.Row2, m.Row3);
+    public static Matrix4 ChonMat(this OpenTK.Mathematics.Matrix4 m) => new(m.Row0, m.Row1, m.Row2, m.Row3);
 }

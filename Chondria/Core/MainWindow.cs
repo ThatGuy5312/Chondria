@@ -10,6 +10,7 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Diagnostics;
 using System.Reflection;
+using Chondria.Entities;
 
 namespace Chondria.Core;
 
@@ -33,6 +34,8 @@ internal class MainWindow : GameWindow
 
     public CameraController cameraController;
 
+    public Scene CurrentScene;
+
     Dictionary<object, MethodInfo> editorWindows = [];
 
     protected override void OnLoad()
@@ -51,14 +54,84 @@ internal class MainWindow : GameWindow
         imGuiController = new(this);
 
         SceneCamera = new(new(0, 0, 3), Size.X / (float)Size.Y);
+        CurrentScene = new Scene();
 
         cameraController = new(SceneCamera);
 
         glRenderer = new GLRenderer();
         glRenderer.Init();
 
+        float[] vertices = {
+            // position        // normal
+            -0.5f, -0.5f, 0.5f,  0, 0, 1,
+             0.5f, -0.5f, 0.5f,  0, 0, 1,
+             0.5f,  0.5f, 0.5f,  0, 0, 1,
+
+            0.5f,  0.5f, 0.5f,  0, 0, 1,
+            -0.5f,  0.5f, 0.5f,  0, 0, 1,
+            -0.5f, -0.5f, 0.5f,  0, 0, 1,
+
+            -0.5f, -0.5f, -0.5f,  0, 0, -1,
+            0.5f, -0.5f, -0.5f,  0, 0, -1,
+            0.5f, 0.5f, -0.5f,  0, 0, -1,
+
+            0.5f, 0.5f, -0.5f,  0, 0, -1,
+            -0.5f, 0.5f, -0.5f,  0, 0, -1,
+            -0.5f, -0.5f, -0.5f,  0, 0, -1,
+
+            -0.5f, 0.5f, 0.5f,  -1, 0, 0,
+            -0.5f, 0.5f, -0.5f,  -1, 0, 0,
+            -0.5f, -0.5f, -0.5f,  -1, 0, 0,
+
+            -0.5f, -0.5f, -0.5f,  -1, 0, 0,
+            -0.5f, -0.5f, 0.5f,  -1, 0, 0,
+            -0.5f, 0.5f, 0.5f,  -1, 0, 0,
+
+            0.5f, 0.5f, 0.5f,  1, 0, 0,
+            0.5f, 0.5f, -0.5f,  1, 0, 0,
+            0.5f, -0.5f, -0.5f,  1, 0, 0,
+
+            0.5f, -0.5f, -0.5f,  1, 0, 0,
+            0.5f, -0.5f, 0.5f,  1, 0, 0,
+            0.5f, 0.5f, 0.5f,  1, 0, 0,
+
+            -0.5f, 0.5f, -0.5f,  0, 1, 0,
+            0.5f, 0.5f, -0.5f,  0, 1, 0,
+            0.5f, 0.5f, 0.5f,  0, 1, 0,
+
+            0.5f, 0.5f, 0.5f,  0, 1, 0,
+            -0.5f, 0.5f, 0.5f,  0, 1, 0,
+            -0.5f, 0.5f, -0.5f,  0, 1, 0,
+
+            -0.5f, -0.5f, -0.5f,  0, -1, 0,
+            0.5f, -0.5f, -0.5f,  0, -1, 0,
+            0.5f, -0.5f, 0.5f,  0, -1, 0,
+
+            0.5f, -0.5f, 0.5f,  0, -1, 0,
+            -0.5f, -0.5f, 0.5f,  0, -1, 0,
+            -0.5f, -0.5f, -0.5f,  0, -1, 0,
+        };
+
+        var mesh = new Mesh(vertices);
+
+        var meshRenderer = new MeshRenderer(mesh);
+
+        meshRenderer.Material.Color = new Vector3(0, 1, 0);
+
+        var mesh2 = new Mesh(vertices);
+
+        var meshRenderer2 = new MeshRenderer(mesh);
+
+        meshRenderer2.Material.Color = new Vector3(1, 0, 0);
+
+        meshRenderer2.Transform.Position = new Vector3(2, 0, 0);
+
+        CurrentScene.Add(meshRenderer);
+        CurrentScene.Add(meshRenderer2);
+
         MainWindowInfo.GLRenderer = glRenderer;
         MainWindowInfo.SceneCamera = SceneCamera;
+        MainWindowInfo.CurrentScene = CurrentScene;
         MainWindowInfo.CameraController = cameraController;
     }
 
@@ -126,7 +199,7 @@ internal class MainWindow : GameWindow
 
         // renders the the cube while passing in a camera.
         // I plan to eventually pass in a scene and camera but this is just a test for now.
-        glRenderer.Render(in SceneCamera);
+        glRenderer.Render(in CurrentScene, in SceneCamera);
 
         GL.Enable(EnableCap.DepthTest);
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);

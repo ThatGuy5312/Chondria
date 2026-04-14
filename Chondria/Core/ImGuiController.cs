@@ -247,7 +247,7 @@ void main()
         GL.Enable(EnableCap.ScissorTest);
 
         GL.UseProgram(_shaderProgram);
-        var ortho = Matrix4.CreateOrthographicOffCenter(0f, _window.FramebufferSize.X, _window.FramebufferSize.Y, 0f, -1f, 1f);
+        var ortho = OpenTK.Mathematics.Matrix4.CreateOrthographicOffCenter(0f, _window.FramebufferSize.X, _window.FramebufferSize.Y, 0f, -1f, 1f);
         GL.UniformMatrix4(GL.GetUniformLocation(_shaderProgram, "projection"), false, ref ortho);
         GL.BindVertexArray(_vertexArray);
 

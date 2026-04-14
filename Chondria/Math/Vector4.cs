@@ -59,5 +59,31 @@ public struct Vector4
     public static Vector4 operator *(Vector4 a, Vector2 b) => new(a.X * b.X, a.Y * b.Y, a.Z, a.W);
     public static Vector4 operator /(Vector4 a, Vector2 b) => new(a.X / b.X, a.Y / b.Y, a.Z, a.W);
 
+    public float this[int index]
+    {
+        get
+        {
+            return index switch
+            {
+                0 => X,
+                1 => Y,
+                2 => Z,
+                3 => W,
+                _ => throw new IndexOutOfRangeException("Index must be between 0 and 3 inclusive.")
+            };
+        }
+        set
+        {
+            switch (index)
+            {
+                case 0: X = value; break;
+                case 1: Y = value; break;
+                case 2: Z = value; break;
+                case 3: W = value; break;
+                default: throw new IndexOutOfRangeException("Index must be between 0 and 3 inclusive.");
+            }
+        }
+    }
+
     #endregion
 }

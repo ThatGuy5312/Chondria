@@ -55,6 +55,8 @@ class Program
      4/11/2026 - Did some black magic with ImGui to fix the mouse offset and to make it work well while being windowed and made the shader be adjustable during runtime. Also added a Time class.
 
      4/12/2026 - Added a orbital camera mode, added mutiple light support to the shader, and made a window system. Also added a Material class and change the Scene folder name to Management. Oh yeah and I also added a Color struct.
+
+     4/13/2026 - Added a Matrix4 struct (WIP) and made a Scene, Transform, and Mesh class along as a temporary MeshRenderer that acts as a entity. I also updated the renderer to take in a scene to render multiple objects.
      
      */
 }
