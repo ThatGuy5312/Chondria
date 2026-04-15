@@ -123,10 +123,13 @@ public struct Matrix4
 
     public static Matrix4 CreateTranslation(Vector3 translation)
     {
-        return new Matrix4(1, 0, 0, translation.X,
-                           0, 1, 0, translation.Y,
-                           0, 0, 1, translation.Z,
-                           0, 0, 0, 1);
+        var result = Identity;
+
+        result.Row3.X = translation.X;
+        result.Row3.Y = translation.Y;
+        result.Row3.Z = translation.Z;
+
+        return result;
     }
 
     public static Matrix4 CreateScale(Vector3 scale)

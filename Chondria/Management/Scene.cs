@@ -12,11 +12,17 @@ namespace Chondria.Management
             Name = name;
         }
 
-        public List<MeshRenderer> Objects = new();
+        public MeshRenderer[] Objects = [];
 
         public void Add(MeshRenderer obj)
         {
-            Objects.Add(obj);
+            var newObjects = new MeshRenderer[Objects.Length + 1];
+            for (int i = 0; i < Objects.Length; i++)
+            {
+                newObjects[i] = Objects[i];
+            }
+            newObjects[Objects.Length] = obj;
+            Objects = newObjects;
         }
     }
 }

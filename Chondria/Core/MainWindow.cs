@@ -38,6 +38,8 @@ internal class MainWindow : GameWindow
 
     Dictionary<object, MethodInfo> editorWindows = [];
 
+    MeshRenderer testObject;
+
     protected override void OnLoad()
     {
         base.OnLoad();
@@ -114,25 +116,30 @@ internal class MainWindow : GameWindow
 
         var mesh = new Mesh(vertices);
 
-        var meshRenderer = new MeshRenderer(mesh);
+        testObject = new MeshRenderer(mesh);
+        testObject.Name = "Parent";
+        testObject.Transform.Position = new Vector3(0, 0, 0);
 
-        meshRenderer.Material.Color = new Vector3(0, 1, 0);
+        var child1 = new MeshRenderer(mesh);
+        child1.Name = "Child 1";
+        child1.Transform.Position = new Vector3(2, 0, 0);
 
-        var mesh2 = new Mesh(vertices);
+        var child2 = new MeshRenderer(mesh);
+        child2.Name = "Child 2";
+        child2.Transform.Position = new Vector3(-2, 0, 0);
 
-        var meshRenderer2 = new MeshRenderer(mesh);
+        testObject.Transform.AddChild(child1.Transform);
+        testObject.Transform.AddChild(child2.Transform);
 
-        meshRenderer2.Material.Color = new Vector3(1, 0, 0);
-
-        meshRenderer2.Transform.Position = new Vector3(2, 0, 0);
-
-        CurrentScene.Add(meshRenderer);
-        CurrentScene.Add(meshRenderer2);
+        CurrentScene.Add(testObject);
+        CurrentScene.Add(child1);
+        CurrentScene.Add(child2);
 
         MainWindowInfo.GLRenderer = glRenderer;
         MainWindowInfo.SceneCamera = SceneCamera;
         MainWindowInfo.CurrentScene = CurrentScene;
         MainWindowInfo.CameraController = cameraController;
+        MainWindowInfo.SceneEntities = CurrentScene.Objects;//.Select(o => o as MeshRenderer).ToArray();
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)
@@ -142,6 +149,8 @@ internal class MainWindow : GameWindow
         Time.Update((float)args.Time);
 
         Input.UpdateInput(MouseState, KeyboardState);
+
+        testObject.Transform.Rotation *= Quaternion.FromEulerAngles(new Vector3(0, Time.DeltaTime * 20f, 0));
     }
 
     protected override void OnResize(ResizeEventArgs e)

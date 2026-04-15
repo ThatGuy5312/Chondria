@@ -22,7 +22,7 @@ public class GLRenderer
     {
         //GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-        for (int i = 0; i < scene.Objects.Count; i++)
+        for (int i = 0; i < scene.Objects.Length; i++)
         {
             var obj = scene.Objects[i];
 
