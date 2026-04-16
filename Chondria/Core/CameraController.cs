@@ -32,6 +32,11 @@ internal class CameraController(Camera camera)
             HandleFreeCamera(deltaTime);
         else
             HandleOrbitalCamera(deltaTime);
+
+        if (Input.WasKeyPressed(Key.F))
+        {
+            Mode = Mode == CameraMode.Free ? CameraMode.Orbit : CameraMode.Free;
+        }
     }
 
     void HandleFreeCamera(float deltaTime)
