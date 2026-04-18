@@ -15,7 +15,7 @@ internal class MainWindowInfo
 
     public static MeshRenderer[] SceneEntities;
 
-    public static MeshRenderer SelectedEntity;
+    //public static MeshRenderer SelectedEntity;
 
     public static CameraController CameraController;
 

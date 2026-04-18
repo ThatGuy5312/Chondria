@@ -57,10 +57,14 @@ class Program
      4/12/2026 - Added a orbital camera mode, added mutiple light support to the shader, and made a window system. Also added a Material class and change the Scene folder name to Management. Oh yeah and I also added a Color struct.
 
      4/13/2026 - Added a Matrix4 struct (WIP) and made a Scene, Transform, and Mesh class along as a temporary MeshRenderer that acts as a entity. I also updated the renderer to take in a scene to render multiple objects.
-
+     
      4/14/2026 - Added a hierarchy window and added parenting to the Transform functionality.
 
      4/15/2026 - Didn't do much, just made it so you can switch camera movement modes by pressing F (Free and Orbit).
+
+     4/16/2026 - Nothing
+
+     4/17/2026 - Added a static Inspector class that hold the selected object. Also made the Hierarchy and Inspector work better with objects actually being selectable and editable now.
      
      */
 }

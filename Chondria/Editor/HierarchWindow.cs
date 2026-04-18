@@ -61,7 +61,7 @@ internal class HierarchWindow : MainWindowInfo
             ImGuiTreeNodeFlags.OpenOnArrow |
             ImGuiTreeNodeFlags.SpanAvailWidth;
 
-        if (SelectedEntity == obj)
+        if (Inspector.IsSelected(obj))
             flags |= ImGuiTreeNodeFlags.Selected;
 
         bool opened = ImGui.TreeNodeEx(obj.Name, flags);
@@ -69,7 +69,7 @@ internal class HierarchWindow : MainWindowInfo
         // Click selection
         if (ImGui.IsItemClicked())
         {
-            SelectedEntity = obj;
+            Inspector.Select(obj);
         }
 
         if (opened)
@@ -82,9 +82,9 @@ internal class HierarchWindow : MainWindowInfo
                 }
                 else
                 {
-                    if (ImGui.Selectable(child.Entity.Name, SelectedEntity == child.Entity))
+                    if (ImGui.Selectable(child.Entity.Name, Inspector.IsSelected(child.Entity)))
                     {
-                        SelectedEntity = child.Entity;
+                        Inspector.Select(child.Entity);
                     }
                 }
             }
