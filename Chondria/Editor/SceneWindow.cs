@@ -1,12 +1,13 @@
 ﻿using Chondria.Core;
 using Chondria.Math;
+using Chondria.Rendering;
 using Chondria.Windowing;
 using ImGuiNET;
 
 namespace Chondria.Editor
 {
     [EditorWindow("Scene")]
-    internal class SceneWindow : MainWindowInfo
+    internal class SceneWindow : EditorWindow
     {
         Vector2 sceneSize = new(0, 0);
 

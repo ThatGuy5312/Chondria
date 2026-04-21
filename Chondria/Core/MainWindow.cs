@@ -7,14 +7,12 @@ using ImGuiNET;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.GraphicsLibraryFramework;
-using System.Diagnostics;
 using System.Reflection;
 using Chondria.Entities;
 
 namespace Chondria.Core;
 
-// main window for everything
+// main window that displays and runs almost everything
 internal class MainWindow : GameWindow
 {
     public MainWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) => 
@@ -36,9 +34,13 @@ internal class MainWindow : GameWindow
 
     public Scene CurrentScene;
 
-    Dictionary<object, MethodInfo> editorWindows = [];
+    Dictionary<object, (MethodInfo, EditorWindowAttribute, FieldInfo?)> editorWindows = [];
 
-    MeshRenderer testObject;
+    Entity testObject;
+
+    bool settingsWindowOpen = false;
+
+    public WindowTheme MainWindowTheme = new();
 
     protected override void OnLoad()
     {
@@ -50,96 +52,54 @@ internal class MainWindow : GameWindow
         //drawer = new TestPatternDrawer();
 
         FindEditorWindows();
+        ImGuiUtilites.LoadEditorWindows();
+        ImGuiUtilites.DeactivateEditorWindow("Settings");
 
         SetupFramebuffer(Size.X, Size.Y);
 
         imGuiController = new(this);
 
+        MainWindowTheme.Apply();
+
         SceneCamera = new(new(0, 0, 3), Size.X / (float)Size.Y);
         CurrentScene = new Scene();
+        Scene.LoadScene(CurrentScene);
 
         cameraController = new(SceneCamera);
 
         glRenderer = new GLRenderer();
         glRenderer.Init();
 
-        float[] vertices = {
-            // position        // normal
-            -0.5f, -0.5f, 0.5f,  0, 0, 1,
-             0.5f, -0.5f, 0.5f,  0, 0, 1,
-             0.5f,  0.5f, 0.5f,  0, 0, 1,
-
-            0.5f,  0.5f, 0.5f,  0, 0, 1,
-            -0.5f,  0.5f, 0.5f,  0, 0, 1,
-            -0.5f, -0.5f, 0.5f,  0, 0, 1,
-
-            -0.5f, -0.5f, -0.5f,  0, 0, -1,
-            0.5f, -0.5f, -0.5f,  0, 0, -1,
-            0.5f, 0.5f, -0.5f,  0, 0, -1,
-
-            0.5f, 0.5f, -0.5f,  0, 0, -1,
-            -0.5f, 0.5f, -0.5f,  0, 0, -1,
-            -0.5f, -0.5f, -0.5f,  0, 0, -1,
-
-            -0.5f, 0.5f, 0.5f,  -1, 0, 0,
-            -0.5f, 0.5f, -0.5f,  -1, 0, 0,
-            -0.5f, -0.5f, -0.5f,  -1, 0, 0,
-
-            -0.5f, -0.5f, -0.5f,  -1, 0, 0,
-            -0.5f, -0.5f, 0.5f,  -1, 0, 0,
-            -0.5f, 0.5f, 0.5f,  -1, 0, 0,
-
-            0.5f, 0.5f, 0.5f,  1, 0, 0,
-            0.5f, 0.5f, -0.5f,  1, 0, 0,
-            0.5f, -0.5f, -0.5f,  1, 0, 0,
-
-            0.5f, -0.5f, -0.5f,  1, 0, 0,
-            0.5f, -0.5f, 0.5f,  1, 0, 0,
-            0.5f, 0.5f, 0.5f,  1, 0, 0,
-
-            -0.5f, 0.5f, -0.5f,  0, 1, 0,
-            0.5f, 0.5f, -0.5f,  0, 1, 0,
-            0.5f, 0.5f, 0.5f,  0, 1, 0,
-
-            0.5f, 0.5f, 0.5f,  0, 1, 0,
-            -0.5f, 0.5f, 0.5f,  0, 1, 0,
-            -0.5f, 0.5f, -0.5f,  0, 1, 0,
-
-            -0.5f, -0.5f, -0.5f,  0, -1, 0,
-            0.5f, -0.5f, -0.5f,  0, -1, 0,
-            0.5f, -0.5f, 0.5f,  0, -1, 0,
-
-            0.5f, -0.5f, 0.5f,  0, -1, 0,
-            -0.5f, -0.5f, 0.5f,  0, -1, 0,
-            -0.5f, -0.5f, -0.5f,  0, -1, 0,
-        };
-
-        var mesh = new Mesh(vertices);
-
-        testObject = new MeshRenderer(mesh);
-        testObject.Name = "Parent";
+        testObject = Entity.Create("Parent", BaseMesh.Cube);
         testObject.Transform.Position = new Vector3(0, 0, 0);
-
-        var child1 = new MeshRenderer(mesh);
-        child1.Name = "Child 1";
+        
+        var child1 = Entity.Create("Child 1", BaseMesh.Sphere);
         child1.Transform.Position = new Vector3(2, 0, 0);
 
-        var child2 = new MeshRenderer(mesh);
-        child2.Name = "Child 2";
+        var child2 = Entity.Create("Child 2", BaseMesh.Sphere);
         child2.Transform.Position = new Vector3(-2, 0, 0);
+
+        var light1 = new Entity("Light 1");
+        light1.Transform.Position = new Vector3(0, 0, 2);
+        var l1 = light1.AddComponent<Light>();
+        l1.Color = Color.Indigo;
+
+        var light2 = new Entity("Light 2");
+        light2.Transform.Position = new Vector3(0, 0, -2);
+        var l2 = light2.AddComponent<Light>();
+        l2.Color = Color.Teal;
 
         testObject.Transform.AddChild(child1.Transform);
         testObject.Transform.AddChild(child2.Transform);
 
-        CurrentScene.Add(testObject);
-        CurrentScene.Add(child1);
-        CurrentScene.Add(child2);
+        CurrentScene.AddEntity(light1);
+        CurrentScene.AddEntity(light2);
 
-        MainWindowInfo.GLRenderer = glRenderer;
-        MainWindowInfo.SceneCamera = SceneCamera;
-        MainWindowInfo.CurrentScene = CurrentScene;
-        MainWindowInfo.CameraController = cameraController;
-        MainWindowInfo.SceneEntities = CurrentScene.Objects;//.Select(o => o as MeshRenderer).ToArray();
+        EditorWindow.GLRenderer = glRenderer;
+        EditorWindow.SceneCamera = SceneCamera;
+        EditorWindow.CurrentScene = CurrentScene;
+        EditorWindow.CameraController = cameraController;
+        EditorWindow.SceneEntities = CurrentScene.Objects;//.Select(o => o as MeshRenderer).ToArray();
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)
@@ -157,7 +117,7 @@ internal class MainWindow : GameWindow
     {
         base.OnResize(e);
         SetupFramebuffer(e.Width, e.Height);
-        MainWindowInfo.SceneTexture = sceneTexture;
+        EditorWindow.SceneTexture = sceneTexture;
         glRenderer.Resize(e.Width, e.Height);
         //renderer.Resize(Size.X, Size.Y);
     }
@@ -185,11 +145,29 @@ internal class MainWindow : GameWindow
 
         editorWindows.ToList().ForEach(kv =>
         {
-            ImGui.Begin(kv.Key.GetType().Name);
+            if (!ImGuiUtilites.IsWindowActive(kv.Value.Item2.Title))
+                return;
 
-            kv.Value.Invoke(kv.Key, null);
+            if (kv.Value.Item3 != null) // i feel like theres a million better ways of doing this but im doing the most obvious worst way
+            {
+                var theme = (WindowTheme)kv.Value.Item3.GetValue(kv.Key);
 
-            ImGui.End();
+                ImGuiUtilites.Begin(kv.Value.Item2.Title, theme);
+
+                kv.Value.Item1.Invoke(kv.Key, null);
+
+                ImGui.End();
+
+                ImGuiUtilites.PopStyleTheme();
+            }
+            else
+            {
+                ImGui.Begin(kv.Value.Item2.Title);
+
+                kv.Value.Item1.Invoke(kv.Key, null);
+
+                ImGui.End();
+            }
         });
 
         imGuiController.Render();
@@ -243,6 +221,16 @@ internal class MainWindow : GameWindow
             {
                 if (ImGui.MenuItem("Exit"))
                     Close();
+                ImGui.EndMenu();
+            }
+
+            if (ImGui.BeginMenu("Windows"))
+            {
+                if (ImGui.MenuItem("Settings", "", settingsWindowOpen))
+                {
+                    settingsWindowOpen = !settingsWindowOpen;
+                    ImGuiUtilites.SetEditorWindow("Settings", settingsWindowOpen);
+                }
                 ImGui.EndMenu();
             }
             ImGui.EndMainMenuBar();
@@ -301,10 +289,15 @@ internal class MainWindow : GameWindow
             {
                 var instance = Activator.CreateInstance(type);
 
+                var attribute = type.GetCustomAttribute<EditorWindowAttribute>();
+
                 var method = type.GetMethods()
                     .FirstOrDefault(m => m.GetCustomAttribute<EditorWindowDrawAttribute>() != null);
 
-               editorWindows.Add(instance, method);
+                var theme = type.GetFields()
+                    .FirstOrDefault(f => f.GetCustomAttribute<EditorWindowThemeAttribute>() != null);
+
+               editorWindows.Add(instance, (method, attribute, theme));
             }
         }
     }

@@ -2,10 +2,12 @@
 
 namespace Chondria.Rendering
 {
+    // creates and holds mesh data
     public class Mesh
     {
         public int VAO;
         public int VBO;
+        public int VertexCount { get; private set; }
 
         public Mesh() { }
 
@@ -15,6 +17,7 @@ namespace Chondria.Rendering
 
             VAO = mesh.VAO;
             VBO = mesh.VBO;
+            VertexCount = mesh.VertexCount;
         }
 
         public static Mesh Create(float[] vertices)
@@ -23,6 +26,7 @@ namespace Chondria.Rendering
 
             mesh.VAO = GL.GenVertexArray();
             mesh.VBO = GL.GenBuffer();
+            mesh.VertexCount = vertices.Length / 6;
             GL.BindVertexArray(mesh.VAO);
             GL.BindBuffer(BufferTarget.ArrayBuffer, mesh.VBO);
             GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
@@ -35,13 +39,15 @@ namespace Chondria.Rendering
             GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
             GL.EnableVertexAttribArray(1);
 
+            Console.WriteLine($"Created mesh with {mesh.VertexCount} vertices");
+
             return mesh;
         }
 
         public void Draw()
         {
             GL.BindVertexArray(VAO);
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, VertexCount);
         }
     }
 }

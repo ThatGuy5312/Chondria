@@ -4,6 +4,7 @@ using Chondria.Management;
 
 namespace Chondria.Core;
 
+// the controller for scene camera movement
 internal class CameraController(Camera camera)
 {
     Camera camera = camera;

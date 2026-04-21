@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Chondria.Math;
 
+// same as Vector2 but intergers
 public struct Vector2i
 {
     public int X;

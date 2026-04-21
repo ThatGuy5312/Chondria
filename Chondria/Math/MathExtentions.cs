@@ -22,6 +22,8 @@ public static class MathExtentions
 
     public static System.Numerics.Vector3 Numerics(this Color v) => new(v.Rf, v.Gf, v.Bf);
     public static OpenTK.Mathematics.Vector3 TK(this Color v) => new(v.Rf, v.Gf, v.Bf);
+    public static System.Numerics.Vector4 Numerics4(this Color v) => new(v.Rf, v.Gf, v.Bf, v.Af);
+    public static OpenTK.Mathematics.Vector4 TK4(this Color v) => new(v.Rf, v.Gf, v.Bf, v.Af);
     public static Color Numerics(this System.Numerics.Vector3 v) => new(v.X, v.Y, v.Z);
     public static Color TK(this OpenTK.Mathematics.Vector3 v) => new(v.X, v.Y, v.Z);
 

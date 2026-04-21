@@ -1,6 +1,6 @@
 ﻿namespace Chondria.Math;
 
-// exactly like a Vector4 but with integer values instead of floats
+// same as Vector4 but intergers
 public struct Vector4i
 {
     public int X;

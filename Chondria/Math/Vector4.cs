@@ -7,6 +7,15 @@ public struct Vector4
     public float Y;
     public float Z;
     public float W;
+
+    public static Vector4 Zero => new(0, 0, 0, 0);
+    public static Vector4 One => new(1, 1, 1, 1);
+
+    public static Vector4 UnitX => new(1, 0, 0, 0);
+    public static Vector4 UnitY => new(0, 1, 0, 0);
+    public static Vector4 UnitZ => new(0, 0, 1, 0);
+    public static Vector4 UnitW => new(0, 0, 0, 1);
+
     public Vector4(float x, float y, float z, float w)
     {
         X = x;

@@ -7,10 +7,12 @@ public class Material
     public float SpecularStrength = 0.5f;
     public float Shininess = 32f;
 
-    public void Apply(Shader shader)
+    public Shader Shader = Shader.DefaultLit;
+
+    /*public void Apply(Shader shader)
     {
         shader.SetVector3("objectColor", Color);
         shader.SetFloat("specularStrength", SpecularStrength);
         shader.SetFloat("shininess", Shininess);
-    }
+    }*/
 }

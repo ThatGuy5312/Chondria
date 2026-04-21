@@ -1,5 +1,6 @@
 ﻿namespace Chondria.Math;
 
+// A 4 by 4 matrice holding four Vector4s. Mainly used for transformation matrix.
 public struct Matrix4
 {
     /// <summary>
@@ -45,6 +46,8 @@ public struct Matrix4
         Row2 = new Vector4(m20, m21, m22, m23);
         Row3 = new Vector4(m30, m31, m32, m33);
     }
+
+    #region operators
 
     public static implicit operator OpenTK.Mathematics.Matrix4(Matrix4 m) => new(m.Row0, m.Row1, m.Row2, m.Row3);
     public static implicit operator Matrix4(OpenTK.Mathematics.Matrix4 m) => new(m.Row0, m.Row1, m.Row2, m.Row3);
@@ -120,6 +123,10 @@ public struct Matrix4
             }
         }
     }
+
+    #endregion
+
+    #region static functions
 
     public static Matrix4 CreateTranslation(Vector3 translation)
     {
@@ -209,6 +216,88 @@ public struct Matrix4
                            xAxis.Z, yAxis.Z, zAxis.Z, eye.Z,
                            0, 0, 0, 1);
     }
+
+    public static Vector3 ExtractTranslation(Matrix4 matrix)
+    {
+        return new Vector3(matrix.Row3.X, matrix.Row3.Y, matrix.Row3.Z);
+    }
+
+    public static Quaternion ExtractRotation(Matrix4 matrix)
+    {
+        float trace = matrix.Row0.X + matrix.Row1.Y + matrix.Row2.Z;
+        if (trace > 0)
+        {
+            float s = 0.5f / Mathf.Sqrt(trace + 1.0f);
+            return new Quaternion(
+                (matrix.Row1.Z - matrix.Row2.Y) * s,
+                (matrix.Row2.X - matrix.Row0.Z) * s,
+                (matrix.Row0.Y - matrix.Row1.X) * s,
+                0.25f / s
+            );
+        }
+        else
+        {
+            if (matrix.Row0.X > matrix.Row1.Y && matrix.Row0.X > matrix.Row2.Z)
+            {
+                float s = 2.0f * Mathf.Sqrt(1.0f + matrix.Row0.X - matrix.Row1.Y - matrix.Row2.Z);
+                return new Quaternion(
+                    0.25f * s,
+                    (matrix.Row0.Y + matrix.Row1.X) / s,
+                    (matrix.Row0.Z + matrix.Row2.X) / s,
+                    (matrix.Row1.Z - matrix.Row2.Y) / s
+                );
+            }
+            else if (matrix.Row1.Y > matrix.Row2.Z)
+            {
+                float s = 2.0f * Mathf.Sqrt(1.0f + matrix.Row1.Y - matrix.Row0.X - matrix.Row2.Z);
+                return new Quaternion(
+                    (matrix.Row0.Y + matrix.Row1.X) / s,
+                    0.25f * s,
+                    (matrix.Row1.Z + matrix.Row2.Y) / s,
+                    (matrix.Row2.X - matrix.Row0.Z) / s
+                );
+            }
+            else
+            {
+                float s = 2.0f * Mathf.Sqrt(1.0f + matrix.Row2.Z - matrix.Row0.X - matrix.Row1.Y);
+                return new Quaternion(
+                    (matrix.Row0.Z + matrix.Row2.X) / s,
+                    (matrix.Row1.Z + matrix.Row2.Y) / s,
+                    0.25f * s,
+                    (matrix.Row0.Y - matrix.Row1.X) / s
+                );
+            }
+        }
+    }
+
+    public static Vector3 ExtractScale(Matrix4 matrix)
+    {
+        float scaleX = new Vector3(matrix.Row0.X, matrix.Row0.Y, matrix.Row0.Z).Length();
+        float scaleY = new Vector3(matrix.Row1.X, matrix.Row1.Y, matrix.Row1.Z).Length();
+        float scaleZ = new Vector3(matrix.Row2.X, matrix.Row2.Y, matrix.Row2.Z).Length();
+        return new Vector3(scaleX, scaleY, scaleZ);
+    }
+
+    #endregion
+
+    #region instance functions
+
+    public Vector3 ExtractTranslation() => ExtractTranslation(this);
+
+    public Quaternion ExtractRotation() => ExtractRotation(this);
+    public Vector3 ExtractEulerRotation() => ExtractRotation(this).ToEulerAngles();
+
+    public Vector3 ExtractScale() => ExtractScale(this);
+
+    public void LookAt(Vector3 target, Vector3 up)
+    {
+        var lookAtMatrix = CreateLookAt(ExtractTranslation(), target, up);
+        Row0 = lookAtMatrix.Row0;
+        Row1 = lookAtMatrix.Row1;
+        Row2 = lookAtMatrix.Row2;
+    }
+
+    #endregion
 
     public override string ToString()
     {

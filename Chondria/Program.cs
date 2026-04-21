@@ -4,6 +4,7 @@ using Chondria.Core;
 
 namespace Chondria;
 
+// program entrypoint class
 class Program
 {
     /*
@@ -65,6 +66,19 @@ class Program
      4/16/2026 - Nothing
 
      4/17/2026 - Added a static Inspector class that hold the selected object. Also made the Hierarchy and Inspector work better with objects actually being selectable and editable now.
+
+     4/18/2026 - Changed entity system to be a actual entity system with components instead of just being a mesh renderer. Also changed GLRenderer to use a objects shader. (GLRenderer is broken right now)
+     Added Entity, Component, and Light
+     I also wanted to be able to make sespific windows different colors so i made ImGuiUtilites to help with things like that and also WindowTheme and EditorWindowThemeAttribute
+     to tell the window loader that that field is the main window theme of that window.
+
+     4/19/2026 - Made the inspector dynamically find fields, properties, and methods for a component instead of relying on the virtual void OnEditorGui(). Also added window theme settings.
+     Removed the use for OnEditorGui() and added MethodInspectorAttribute to tell the method loader that thats a method you want to be shown on the inspector.
+     Also renamed MainWindowInfo to EditorWindow because now it holds things like if that sespific window is active and showing. Which can be controlled by ImGuiUtilites.
+
+     4/20/2026 - Fixed broken rendering (ambient issue i think). Added BaseMeshes.cs and some fucntions to inside Entity to be able to make objects with a Cube or Sphere mesh (will add more later)
+
+     Didn't push any of these last three to github since there were issues first but now its been worked out and fixed. ^^^
      
      */
 }

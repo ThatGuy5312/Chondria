@@ -1,7 +1,8 @@
 ﻿namespace Chondria.Windowing;
 
 [AttributeUsage(AttributeTargets.Class)]
-internal class EditorWindowAttribute : Attribute
+// EditorWindow (how you call it), makes the class be found durring reflection for editor windows.
+public class EditorWindowAttribute : Attribute
 {
     public string Title { get; }
 

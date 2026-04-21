@@ -1,5 +1,6 @@
 ﻿namespace Chondria.Math;
 
+// Quaternion, mainly used for rotation of objects holding euler X, Y, and Z values and a scaler value, W.
 public struct Quaternion
 {
     public float X;

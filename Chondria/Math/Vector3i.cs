@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Chondria.Math;
 
-namespace Chondria.Math;
-
+// same as Vector3 but intergers
 public struct Vector3i
 {
     public int X;

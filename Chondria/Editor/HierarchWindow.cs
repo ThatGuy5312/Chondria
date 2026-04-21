@@ -1,18 +1,29 @@
 ﻿using Chondria.Entities;
 using Chondria.Windowing;
 using ImGuiNET;
-using System.Numerics;
+using Chondria.Math;
 
 namespace Chondria.Editor;
 
 [EditorWindow("Hierarchy")]
-internal class HierarchWindow : MainWindowInfo
+internal class HierarchWindow : EditorWindow
 {
     [EditorWindowDraw]
     public void Draw()
     {
+        if (ImGui.BeginPopupContextWindow("entity_creation_popup", ImGuiPopupFlags.MouseButtonRight))
+        {
+            ImGui.TextDisabled("CREATE");
+
+            ImGui.Separator();
+
+
+
+            ImGui.EndPopup();
+        }
+
         var sceneText = CurrentScene == null ? "No Scene Selected" : CurrentScene.Name;
-        BubbleText(sceneText, new(5));
+        ImGuiUtilites.BubbleText(sceneText, new(5));
 
         ImGui.Separator();
 
@@ -33,31 +44,20 @@ internal class HierarchWindow : MainWindowInfo
         }
     }
 
-    // might make a UI Utils class later to put stuff like this in
-    public static void BubbleText(string text, Vector2 padding)
-    {
-        var drawList = ImGui.GetWindowDrawList();
-        var pos = ImGui.GetCursorScreenPos();
-
-        var size = ImGui.CalcTextSize(text);
-
-        drawList.AddRectFilled(
-            pos - padding,
-            pos + size + padding,
-            ImGui.GetColorU32(new Vector4(0.15f, 0.15f, 0.15f, 0.9f)),
-            8f
-        );
-
-        drawList.AddText(pos, ImGui.GetColorU32(Vector4.One), text);
-
-        ImGui.Dummy(size + padding * 2);
-    }
-
-    static void DrawNode(MeshRenderer obj)
+    static void DrawNode(Entity obj)
     {
         bool hasChildren = obj.Transform.Children.Count > 0;
 
-        ImGuiTreeNodeFlags flags =
+        if (!hasChildren)
+        {
+            if (ImGui.Selectable(obj.Name, Inspector.IsSelected(obj)))
+            {
+                Inspector.Select(obj);
+            }
+            return;
+        }
+
+        var flags =
             ImGuiTreeNodeFlags.OpenOnArrow |
             ImGuiTreeNodeFlags.SpanAvailWidth;
 

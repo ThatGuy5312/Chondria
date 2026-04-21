@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Chondria.Core;
 
-namespace Chondria.Core;
-
+// main game time variables
 public static class Time
 {
     public static float GameTime { get; private set; }

@@ -12,6 +12,12 @@ public struct Vector2
     public static Vector2 UnitX => new(1, 0);
     public static Vector2 UnitY => new(0, 1);
 
+    public Vector2(float value)
+    {
+        X = value;
+        Y = value;
+    }
+
     public Vector2(float x, float y)
     {
         X = x;
